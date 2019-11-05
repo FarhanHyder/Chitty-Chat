@@ -29,6 +29,9 @@
         <mat-list-item *ngFor="let member of selectedConversation.members">
           <p>{{ member.value.user.name }}</p>
         </mat-list-item>
+        <a class="nav-item nav-link" (click)="logout()">
+          <mat-icon>power_settings_new</mat-icon>
+        </a>
         <!-- <mat-list-item>member</mat-list-item> -->
       </mat-list>
     </mat-card>
