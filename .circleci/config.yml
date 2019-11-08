@@ -1,46 +1,81 @@
-version: 2
+version: 2.1
+orbs:
+  aws-ecr: circleci/aws-ecr@6.5.0
+  aws-ecs: circleci/aws-ecs@0.0.22
 
 jobs:
-    build:
-        working_directory: ~/Chitty-Chat
-        docker:
-            - image: circleci/node:10-browsers
-        steps:
-            # Checkout the code from the branch into the working_directory
-            - checkout
-            # Log the current branch
-            - run:
-                name: Show current branch
-                command: echo ${CIRCLE_BRANCH}
-            # Restore local dependencies from cache
-            - restore_cache:
-                keys:
-                - v1-dependencies-{{ checksum "package.json" }}
-                - v1-dependencies-
-            # Install project dependencies
-            - run:
-                name: Install local dependencies
-                command: npm install
-            # Cache local dependencies if they don't exist
-            - save_cache:
-                key: v1-dependencies-{{ checksum "package.json" }}
-                paths:
-                    - node_modules
-            # Lint the source code
-            - run:
-                name: Linting
-                command: npm run lint
-            # Test the source code
-            - run:
-                name: Testing
-                command: npm run test
-            # Build project with different configuration based on
-            # the current branch
-            - run:
-                name: Building
-                command: npm run build
-            # Cache the dist folder for the deploy job
-            - save_cache:
-                key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
-                paths:
-                    - dist
+  build:
+    working_directory: ~/Chitty-Chat
+    docker:
+      - image: circleci/node:13-browsers
+    steps:
+      # Checkout the code from the branch into the working_directory
+      - checkout
+      # Log the current branch
+      - run:
+          name: Show current branch
+          command: echo ${CIRCLE_BRANCH}
+      # Restore local dependencies from cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      # Install project dependencies
+      - run:
+          name: Install local dependencies
+          command: npm install
+      # Cache local dependencies if they don't exist
+      - save_cache:
+          key: v1-dependencies-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      # Lint the source code
+      - run:
+          name: Linting
+          command: npm run lint
+      # Test the source code
+      - run:
+          name: Testing
+          command: npm run test
+      # Build project with different configuration based on
+      # the current branch
+      - run:
+          name: Building
+          command: npm run build
+      # Cache the dist folder for the deploy job
+      - save_cache:
+          key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - dist
+            
+
+workflows:
+  version: 2.1
+  build-and-deploy:
+    jobs:
+      - build
+      # build docker image and push to ecr
+      - aws-ecr/build-and-push-image:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+          account-url: AWS_ECR_ACCOUNT_URL_ENV_VAR_NAME
+          aws-access-key-id: ACCESS_KEY_ID_ENV_VAR_NAME
+          aws-secret-access-key: SECRET_ACCESS_KEY_ENV_VAR_NAME
+          create-repo: true
+          dockerfile: 'Dockerfile'
+          region: AWS_REGION_ENV_VAR_NAME
+          repo: 'chitty-chat'
+
+      # update ecs
+      - aws-ecs/deploy-service-update:
+          requires:
+            - aws-ecr/build-and-push-image
+          aws-access-key-id: $ACCESS_KEY_ID_ENV_VAR_NAME
+          aws-secret-access-key: $SECRET_ACCESS_KEY_ENV_VAR_NAME
+          aws-region: $AWS_REGION_ENV_VAR_NAME
+          family: 'chitty-chat'
+          cluster-name: 'chitty-chat-cluster'
+          container-image-name-updates: 'container=chitty-chat,tag=latest'
