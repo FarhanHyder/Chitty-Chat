@@ -8,6 +8,12 @@ import { MaterialModule } from '../modules/material-module';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ChatboxComponent } from '../chatbox/chatbox.component';
+import { ChatService } from '../services/chat.service';
+import { AuthService } from '../services/auth.service';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireModule } from '@angular/fire';
+import { environment } from 'src/environments/environment';
 
 describe('CreateChannelComponent', () => {
   let component: CreateChannelComponent;
@@ -32,9 +38,11 @@ describe('CreateChannelComponent', () => {
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
+        AngularFireModule.initializeApp(environment.firebase)
       ],
       declarations: [ CreateChannelComponent, ChatboxComponent ],
       providers: [
+        ChatService, AuthService, AngularFireAuth, AngularFirestore,
         { provide: MatDialogRef,
           useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA,

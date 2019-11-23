@@ -6,7 +6,7 @@
       <div mat-dialog-content>
         <p>Create Chatroom Name</p>
         <mat-form-field>
-          <input matInput [(ngModel)]="data.chatroomName">
+          <input matInput [(ngModel)]="roomname">
         </mat-form-field>
       </div>
       </mat-card>
@@ -14,5 +14,5 @@
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onNoClick()">Exit</button>
-  <button mat-button [mat-dialog-close]="data.chatroomName" >Start Chatting!</button>
+  <button mat-button (click)="sendToFirebase()" [mat-dialog-close]="roomname" >Start Chatting!</button>
 </div>

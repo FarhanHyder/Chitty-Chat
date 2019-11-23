@@ -20,8 +20,8 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./chatbox.component.scss']
 })
 export class ChatboxComponent implements OnInit {
-  chatroomName: string;
-  userID: string;
+  // chatroomName: string;
+  // userID: string;
   @Input() userInfo: User;
   selectedChatRoomID = 'UgQEVNxekZrld8UJqtkZ';
   chatroomSubscription: Subscription;
@@ -31,6 +31,10 @@ export class ChatboxComponent implements OnInit {
   messages: string[] = [];
   secretCode = 'secret';
   friendListId = [];
+  status: string;
+  roomname: string;
+  userList: string[];
+  ownerID: string;
   conversationsListId = [
     '05kbCceCnYxcfOxewCJK',
     'UgQEVNxekZrld8UJqtkZ',
@@ -168,21 +172,27 @@ export class ChatboxComponent implements OnInit {
       objDiv.scrollTop = objDiv.scrollHeight;
     }
   }
+
   openDialog(): void {
     const dialogRef = this.dialog.open(CreateChannelComponent, {
       width: '2000px',
-      data: { userID: this.userID, chatroomName: this.chatroomName }
+      data: {
+        ownerID: this.userInfo.uid,
+        getChatroomList: this.getChatroomList.bind(this)
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      this.chatroomName = result;
+      this.roomname = result;
+      console.log(result);
     });
   }
 
   //  Retrieves the user's chatrooms and stores them in this.chatroomList
   getChatroomList(): Promise<void> {
     return new Promise((resolve, reject) => {
+      this.chatroomList = [];
       const availableChatrooms = this.chatroomList;
       this.userInfoService.getCurrentUserInfo(this.userInfo.uid)
         .subscribe({
