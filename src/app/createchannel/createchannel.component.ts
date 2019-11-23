@@ -23,7 +23,7 @@ export class CreateChannelComponent implements OnInit {
    // tslint:disable-next-line: member-ordering
    any: string[];
    status: string;
-   roomname: string;
+   roomName: string;
    userList: string[];
    ownerID: string;
 
@@ -31,7 +31,7 @@ export class CreateChannelComponent implements OnInit {
    }
 
   sendToFirebase(): void {
-    this.chatroomService.addNewChatroom('public', this.roomname, [], this.data.ownerID)
+    this.chatroomService.addNewChatroom('public', this.roomName, [], this.data.ownerID)
     .then((result: any) => {
       this.data.getChatroomList();
     });

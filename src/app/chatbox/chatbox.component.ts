@@ -20,8 +20,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./chatbox.component.scss']
 })
 export class ChatboxComponent implements OnInit {
-  // chatroomName: string;
-  // userID: string;
+
   @Input() userInfo: User;
   selectedChatRoomID = 'UgQEVNxekZrld8UJqtkZ';
   chatroomSubscription: Subscription;
@@ -31,10 +30,8 @@ export class ChatboxComponent implements OnInit {
   messages: string[] = [];
   secretCode = 'secret';
   friendListId = [];
-  status: string;
-  roomname: string;
-  userList: string[];
-  ownerID: string;
+  roomName: string;
+
   conversationsListId = [
     '05kbCceCnYxcfOxewCJK',
     'UgQEVNxekZrld8UJqtkZ',
@@ -184,7 +181,7 @@ export class ChatboxComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      this.roomname = result;
+      this.roomName = result;
       console.log(result);
     });
   }
